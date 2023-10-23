@@ -4,6 +4,18 @@ import pandas as pd
 import sympy as sp
 from scipy import signal
 
+def save_pdf(filename, fig=None, filetype='pdf'):
+    """Save to @filename with a custom set of file formats.
+    
+    By default, this function takes to most recent figure,
+    but a @fig can also be passed to this function as an argument.
+    """
+    if fig is None:
+        plt.savefig("%s.%s"%(filename, filetype))
+    else:
+        fig.savefig("%s.%s"%(filename, filetype))
+
+
 class PlotBode:
     def __init__(self, figsize=(10, 6)):
         self.fig, self.ax1 = plt.subplots(figsize=figsize)
@@ -94,7 +106,7 @@ class PlotBode:
         self.ax2.yaxis.set_minor_locator(plt.MultipleLocator(min2loc))
         # self.ax1.yaxis.set_major_locator(plt.MultipleLocator(20))
 
-        self.ax1.set_ylabel('Ganancia $|Z|_{{dB}}$')
+        self.ax1.set_ylabel('Ganancia $[dB]$')
         if self.ax2.get_lines():
             self.ax2.set_ylabel('Fase $[\degree]$')
 
@@ -113,15 +125,30 @@ class PlotBode:
         plt.tight_layout()
         plt.show()
 
-def plotSensTable(sensTable, labels, title="", figsize=(5,1)):
-    plt.figure(figsize=figsize)
+def plotSensTable(sensTable, labels, title=None, ylabel=None, figsize=(5,1.5), save=False):
+    # Clear last figure
+    plt.clf()
+    # create a new figure and axis object
+    fig = plt.figure(figsize=figsize)
     plt.bar(labels, sensTable)
     plt.title(title)
+    plt.ylabel(ylabel)
     plt.grid(True, axis='y', alpha=0.5)
     plt.gca().yaxis.set_major_locator(plt.MultipleLocator(0.25))
     # plt.gca().yaxis.set_minor_locator(plt.MultipleLocator(0.05))
     plt.axhline(y=0, color='k', alpha=0.6, lw=0.5)
+    plt.tight_layout()
     plt.show()
+    if save:
+        # remove the $,{,},^,_,\ from the title using regex
+        import re   # YA SE QUE ES RE RANCIO HACER ESTO
+        if ylabel is None and title is None:
+            filename = str(np.random.randint(100000))
+        if title is None:
+            filename = re.sub(r'[\$\{\}\^_,\\]', '', ylabel)
+        else:
+            filename = re.sub(r'[\$\{\}\^_,\\]', '', title)
+        save_pdf("sens_table_"+filename, fig)
 
 class PoleZeroPlotter:
     def __init__(self, transfer_function=None, figsize=(3, 3)):
@@ -171,21 +198,23 @@ class PoleZeroPlotter:
         polesImag = [p.imag for p in self.poles]
 
         # find max value for axis limits
+        maxVal = 0
         xLims = [0,0]
         yLims = [0,0]
         for z in self.zeros:
-            xLims[0] = min(xLims[0], z.real) - 0.01
-            xLims[1] = max(xLims[1], z.real) + 0.01
-            yLims[0] = min(yLims[0], z.imag) - 0.01
-            yLims[1] = max(yLims[1], z.imag) + 0.01
+            xLims[0] = min(xLims[0], z.real)
+            xLims[1] = max(xLims[1], z.real)
+            yLims[0] = min(yLims[0], z.imag)
+            yLims[1] = max(yLims[1], z.imag)
         for p in self.poles:
-            xLims[0] = min(xLims[0], p.real) - 0.01
-            xLims[1] = max(xLims[1], p.real) + 0.01
-            yLims[0] = min(yLims[0], p.imag) - 0.01
-            yLims[1] = max(yLims[1], p.imag) + 0.01
+            xLims[0] = min(xLims[0], p.real)
+            xLims[1] = max(xLims[1], p.real)
+            yLims[0] = min(yLims[0], p.imag)
+            yLims[1] = max(yLims[1], p.imag)
         for i in range(2):
-            xLims[i] = xLims[i]*1.07
-            yLims[i] = yLims[i]*1.07
+            xLims[i] = xLims[i]*1.05
+            yLims[i] = yLims[i]*1.05
+        xLims[1] = np.abs(xLims[0] * 0.02)
         # xLims[0] += -1
         # xLims[1] += 0.5
 
@@ -216,6 +245,9 @@ class PoleZeroPlotter:
             self.ax.legend(loc=loc)
         plt.tight_layout()
 
+        self.ax.set_xlabel('Re $[s^{{-1}}]$')
+        self.ax.set_ylabel('Im $[s^{{-1}}]$')
+
         # show the plot
         plt.show()
 
@@ -230,15 +262,3 @@ def fixPhaseJumps(phase):
         else:
             phase[jumps[i]:] += 360
     return phase
-
-
-def save_pdf(filename, fig=None):
-    """Save to @filename with a custom set of file formats.
-    
-    By default, this function takes to most recent figure,
-    but a @fig can also be passed to this function as an argument.
-    """
-    if fig is None:
-        plt.savefig("%s.%s"%(filename, "pdf"))
-    else:
-        fig.savefig("%s.%s"%(filename, "pdf"))
