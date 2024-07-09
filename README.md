@@ -1,6 +1,6 @@
 # itba-tc2-sedra-design
 
-Ecuaciones basadas en el paper "Optimum configurations for single-amplifier biquadratic filters" de A. Sedra, M. Ghorab and K. Martin. IEEE Transactions on Circuits and Systems, vol. 27, no. 12, pp. 1155-1163, December 1980, doi: 10.1109/TCS.1980.1084762.
+Ecuaciones basadas en el paper ["Optimum configurations for single-amplifier biquadratic filters" de A. Sedra, M. Ghorab and K. Martin. IEEE Transactions on Circuits and Systems, vol. 27, no. 12, pp. 1155-1163, December 1980, doi: 10.1109/TCS.1980.1084762](https://ieeexplore.ieee.org/document/1084762).
 
 Los Notebooks se deben mirar en orden desde el 0 al 3
 
